@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronunciation Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #E3F2FD, #F5F5F5);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #34495e;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #playWord {
+            background-color: #3498db;
+        }
+
+        #playWord:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        #startSpeaking {
+            background-color: #2ecc71;
+        }
+
+        #startSpeaking:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+
+        #output {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #2c3e50;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pronunciation Game</h1>
+        <p>Listen to the word and try to pronounce it correctly.</p>
+        
+        <button id="playWord">🔊 Play Word</button>
+        <button id="startSpeaking">🎤 Start Speaking</button>
+
+        <p id="output">Click "Play Word" to start.</p>
+    </div>
+
+    <script>
+        const words = ["apple", "banana", "orange", "elephant", "giraffe", "computer", "javascript", "ocean"];
+        let currentWord = "";
+
+        
+        if (!("speechSynthesis" in window)) {
+            alert("Your browser does not support speech synthesis. Try using Google Chrome.");
+        }
+
+        
+        document.getElementById("playWord").addEventListener("click", function() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            let speech = new SpeechSynthesisUtterance(currentWord);
+            speech.lang = "en-US";
+            window.speechSynthesis.speak(speech);
+
+            document.getElementById("output").textContent = "Now say: " + currentWord;
+            document.getElementById("output").style.color = "black";
+        });
+
+        
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!window.SpeechRecognition) {
+            alert("Speech Recognition is not supported in this browser. Try Google Chrome.");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        document.getElementById("startSpeaking").addEventListener("click", function() {
+            console.log("🎤 Listening for speech...");
+            document.getElementById("output").textContent = "Listening...";
+            document.getElementById("output").style.color = "blue";
+            recognition.start();
+        });
+
+        recognition.onresult = function(event) {
+            let spokenWord = event.results[0][0].transcript.toLowerCase().trim();
+            spokenWord = spokenWord.replace(/[^\w\s]/gi, ''); // Remove punctuation
+        
+            let output = document.getElementById("output");
+            console.log("✅ Recognized Speech:", spokenWord, "| Expected:", currentWord);
+        
+            if (spokenWord === currentWord) {
+                output.textContent = "✅ Correct! Well done!";
+                output.style.color = "green";
+            } else {
+                output.textContent = '❌ Incorrect! You said: , ${spokenWord}. Try again!';
+                output.style.color = "red";
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error("❌ Speech Recognition Error:", event.error);
+            let output = document.getElementById("output");
+
+            if (event.error === "no-speech") {
+                output.textContent = "❌ No speech detected. Try speaking louder!";
+                output.style.color = "red";
+                setTimeout(() => recognition.start(), 1000); // Auto-retry after 1 second
+            } else {
+                output.textContent = "❌ Error: " + event.error + ". Try again!";
+                output.style.color = "red";
+            }
+        };
+    </script>
+
+</body>
+</html>
