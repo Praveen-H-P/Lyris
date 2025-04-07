@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Pronunciation Game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    :root {
+      --dark-gray: #2C3A3B;
+      --deep-teal: #416F6F;
+      --muted-green: #5A7D6C;
+      --olive: #909E81;
+      --beige: #FCEED7;
+      --gold: #FFD700;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #16222A, #3A6073);
+      color: var(--beige);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-theme {
+        background: linear-gradient(135deg, #60a6d4, #169774);
+      color: #ecf0f1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      max-width: 400px;
+      width: 90%;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s;
+    }
+
+    body.dark-theme .container {
+      background: rgba(73, 218, 150, 0.708);
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      /* text-shadow: 2px 2px 10px rgba(26, 25, 24, 0.7); */
+      transition: color 0.3s ease;
+    }
+
+    body.dark-theme h1 {
+      color: #c6e30b; /* Gold color for dark theme */
+    }
+
+    p {
+      margin: 15px 0;
+      font-size: 1.1rem;
+      color: var(--beige);
+      transition: color 0.3s ease;
+    }
+
+    body.dark-theme p {
+      color: #2994db;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 1.1rem;
+      margin: 15px 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
+      color: white;
+    }
+
+    #playWord {
+      background-color: #3498db;
+    }
+
+    body.dark-theme #playWord {
+      background-color: #f1a0a0;
+    }
+
+    #recordButton {
+      background-color: #2ecc71;
+    }
+
+    body.dark-theme #recordButton {
+      background-color: #27ae60;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+    }
+
+    #feedback {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-top: 20px;
+      min-height: 60px;
+      text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.4);
+      transition: color 0.3s ease;
+    }
+
+    body.dark-theme #feedback {
+      color: #ecf0f1;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">A/D</button>
+  <div class="container">
+    <h1>🎙 Pronunciation Game</h1>
+    <p>Listen to the word and try to pronounce it correctly.</p>
+
+    <button id="playWord">🔊 Play Word</button>
+    <button id="recordButton">🎤 Start Speaking</button>
+
+    <p id="feedback">Click "Play Word" to start.</p>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+    }
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let currentWord = "example"; // You can replace this with a dynamic word system
+
+    document.getElementById("playWord").addEventListener("click", function () {
+      const utterance = new SpeechSynthesisUtterance(currentWord);
+      speechSynthesis.speak(utterance);
+      document.getElementById("feedback").textContent = "Now say the word!";
+      document.getElementById("feedback").style.color = "var(--beige)";
+    });
+
+    document.getElementById("recordButton").addEventListener("click", function () {
+      if (!currentWord) {
+        document.getElementById("feedback").textContent = "First, play the word!";
+        document.getElementById("feedback").style.color = "red";
+        return;
+      }
+
+      document.getElementById("feedback").textContent = "Recording...";
+      document.getElementById("feedback").style.color = "white";
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            const formData = new FormData();
+            formData.append("audio_file", audioBlob, "recording.wav");
+            formData.append("target_text", currentWord);
+
+            document.getElementById("feedback").textContent = "Analyzing...";
+
+            try {
+              let response = await fetch("http://127.0.0.1:8000/analyze", {
+                method: "POST",
+                body: formData
+              });
+
+              if (!response.ok) {
+                document.getElementById("feedback").innerHTML = <span class='error'>Error: ${response.status}</span>;
+                return;
+              }
+
+              let result = await response.json();
+              document.getElementById("feedback").innerHTML = "<strong>" + result.badge + "</strong><br>" + result.feedback;
+              document.getElementById("feedback").style.color = result.points > 70 ? "lightgreen" : "salmon";
+            } catch (err) {
+            document.getElementById("feedback").innerHTML = "<span class='error'>Something went wrong!</span>";
+          }
+        };
+
+          setTimeout(() => {
+            mediaRecorder.stop();
+          }, 3000); // 3 seconds
+        })
+        .catch(error => {
+          document.getElementById("feedback").textContent = "Microphone access denied!";
+          document.getElementById("feedback").style.color = "red";
+        });
+    });
+  </script>
+</body>
+</html>

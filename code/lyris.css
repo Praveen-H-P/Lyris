@@ -1,0 +1,83 @@
+body {
+  margin: 0;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Verdana, sans-serif;
+  background-color: #030812;
+  background-image: url("image9.gif");
+  background-position: center;
+  background-position-x: 71%;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+}
+
+body h1 {
+  font-family: "Courier New", Courier, monospace;
+  color: #0ECCED;
+  text-align: center;
+  margin: 0;
+  font-size: 70px;
+  position: absolute;
+  left: 44%;
+  top: 10%;
+}
+
+body p {
+  font-family: "Courier New", bold, Courier, monospace;
+  font-size: 29px;
+  color: #0ECCED;
+  text-align: center;
+  margin: auto;
+  position: absolute;
+  left: 39%;
+  top: 25%;
+}
+
+.navbar {
+  width: 200px;
+  height: 100vh;
+  background-color: #020764;
+  display: flex;
+  flex-direction: column;
+  padding-top: 70px;
+}
+
+.nav-item {
+  padding: 15px;
+  color: #0ECCED;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background-color: #043780;
+}
+
+.nav-item:not(:last-child) {
+  border-bottom: 1px solid #025EC4;
+}
+
+.nav-item:first-child {
+  border-top: 1px solid #025EC4;
+}
+
+.nav-item:last-child {
+  border-bottom: 1px solid #025EC4;
+}
+
+.nav-item:nth-child(2) {
+  position: relative;
+}
+
+.nav-item:nth-child(2)::before {
+  content: "";
+  position: absolute;
+  margin-top: 10px;
+  top: -15px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #025EC4;
+}

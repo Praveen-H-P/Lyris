@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Pronunciation Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    
+        :root {
+          --dark-gray: #2C3A3B;
+          --deep-teal: #416F6F;
+          --muted-green: #5A7D6C;
+          --olive: #909E81;
+          --beige: #FCEED7;
+          --gold: #FFD700;
+        }
+    
+        body {
+          font-family: 'Poppins', sans-serif;
+          text-align: center;
+          margin: 0;
+          padding: 0;
+          background: linear-gradient(to right, #16222A, #3A6073);
+          color: var(--beige);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;  
+          justify-content: center;
+        }
+    
+        .container {
+          background: rgba(255, 255, 255, 0.15);
+          padding: 40px 30px;
+          border-radius: 20px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+          max-width: 400px;
+          width: 90%;
+          backdrop-filter: blur(10px);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .container:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+    
+        h1 {
+          font-size: 2.2rem;
+          margin-bottom: 10px;
+          color: var(--gold);
+          letter-spacing: 1.5px;
+          text-shadow: 2px 2px 10px rgba(26, 25, 24, 0.7);
+        }
+    
+        p {
+          margin: 15px 0;
+          font-size: 1.1rem;
+          color: var(--beige);
+        }
+    
+        button {
+          padding: 12px 20px;
+          font-size: 1.1rem;
+          margin: 15px 10px;
+          cursor: pointer;
+          border: none;
+          border-radius: 8px;
+          font-weight: bold;
+          transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+    
+        #playWord {
+          background-color: var(--gold);
+          color: #2C3A3B;
+        }
+    
+        #recordButton {
+          background-color: var(--beige);
+          color: var(--dark-gray);
+        }
+    
+        button:hover {
+          transform: scale(1.08);
+          box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
+        }
+    
+        #feedback {
+          font-size: 1.2rem;
+          font-weight: bold;
+          margin-top: 20px;
+          min-height: 60px;
+          text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.4);
+        }
+    
+        .error {
+          color: #ff4c4c;
+        }
+      </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pronunciation Game</h1>
+        <p>Listen to the word and try to pronounce it correctly.</p>
+        
+        <button id="playWord">🔊 Play Word</button>
+        <button id="startSpeaking">🎤 Start Speaking</button>
+
+        <p id="output">Click "Play Word" to start.</p>
+    </div>
+
+    <script>
+        const words = ["apple", "banana", "orange", "elephant", "giraffe", "computer", "javascript", "ocean"];
+        let currentWord = "";
+
+        
+        if (!("speechSynthesis" in window)) {
+            alert("Your browser does not support speech synthesis. Try using Google Chrome.");
+        }
+
+        
+        document.getElementById("playWord").addEventListener("click", function() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            let speech = new SpeechSynthesisUtterance(currentWord);
+            speech.lang = "en-US";
+            window.speechSynthesis.speak(speech);
+
+            document.getElementById("output").textContent = "Now say: " + currentWord;
+            document.getElementById("output").style.color = "black";
+        });
+
+        
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!window.SpeechRecognition) {
+            alert("Speech Recognition is not supported in this browser. Try Google Chrome.");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        document.getElementById("startSpeaking").addEventListener("click", function() {
+            console.log("🎤 Listening for speech...");
+            document.getElementById("output").textContent = "Listening...";
+            document.getElementById("output").style.color = "blue";
+            recognition.start();
+        });
+
+        recognition.onresult = function(event) {
+            let spokenWord = event.results[0][0].transcript.toLowerCase().trim();
+            spokenWord = spokenWord.replace(/[^\w\s]/gi, ''); // Remove punctuation
+        
+            let output = document.getElementById("output");
+            console.log("✅ Recognized Speech:", spokenWord, "| Expected:", currentWord);
+        
+            if (spokenWord === currentWord) {
+                output.textContent = "✅ Correct! Well done!";
+                output.style.color = "green";
+            } else {
+                output.textContent = '❌ Incorrect! You said: , ${spokenWord}. Try again!';
+                output.style.color = "red";
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error("❌ Speech Recognition Error:", event.error);
+            let output = document.getElementById("output");
+
+            if (event.error === "no-speech") {
+                output.textContent = "❌ No speech detected. Try speaking louder!";
+                output.style.color = "red";
+                setTimeout(() => recognition.start(), 1000); // Auto-retry after 1 second
+            } else {
+                output.textContent = "❌ Error: " + event.error + ". Try again!";
+                output.style.color = "red";
+            }
+        };
+    </script>
+
+</body>
+</html>
